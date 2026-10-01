@@ -1,98 +1,302 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Un girasol para ti 🌻</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      min-height: 100vh;
-      background: radial-gradient(circle at 50% 20%, #1b2a4a, #0a0f1f 70%);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      font-family: "Segoe UI", system-ui, sans-serif; color: #fff; overflow: hidden;
-    }
-    .estrella {
-      position: absolute; width: 2px; height: 2px; background: #fff; border-radius: 50%;
-      animation: brillar 3s infinite ease-in-out;
-    }
-    @keyframes brillar { 0%,100% { opacity: .2 } 50% { opacity: 1 } }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}</style>
+<title>Girasoles para ti</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Fraunces:ital,opsz,wght@1,9..144,500&display=swap">
+<style>
+  /* Una sola escena nocturna: mensaje arriba que se escribe solo, girasoles dibujándose abajo */
+  :root {
+    --noche: #07070a;
+    --tinta: #f6ecd2;
+    --tinta-suave: #b9ad8f;
+    --girasol: #ffd21f;
+    --girasol-hondo: #e3a008;
+    --font-titulo: "Fraunces", Georgia, "Times New Roman", serif;
+    --font-carta: "Caveat", "Segoe Print", "Bradley Hand", cursive;
+    color-scheme: dark;
+  }
+  html, body { height: 100%; }
+  body {
+    background: var(--noche);
+    color: var(--tinta);
+    font-family: var(--font-carta);
+  }
+  .escena {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    max-width: 720px;
+    margin: 0 auto;
+    padding-inline: 20px;
+    padding-block: 28px 0;
+    box-sizing: border-box;
+  }
+  .carta { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  h1 {
+    margin: 0 0 6px;
+    font-family: var(--font-titulo);
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(1.9rem, 6.5vw, 2.8rem);
+    color: var(--girasol);
+    text-align: center;
+    text-wrap: balance;
+    min-height: 1.3em;
+  }
+  .lineas { display: flex; flex-direction: column; gap: 6px; }
+  .lineas p {
+    margin: 0;
+    font-size: clamp(1.35rem, 4.6vw, 1.7rem);
+    line-height: 1.25;
+    animation: aparecer .5s ease-out both;
+  }
+  .lineas p.final {
+    color: var(--girasol);
+    font-weight: 700;
+    font-size: clamp(1.6rem, 5.6vw, 2.1rem);
+    text-align: center;
+    margin-top: 8px;
+  }
+  .cursor::after {
+    content: "|";
+    color: var(--girasol-hondo);
+    animation: parpadeo .8s steps(1) infinite;
+  }
+  .jardin { flex: 1; min-height: 340px; position: relative; }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 
-    .escena { position: relative; width: 300px; height: 460px; }
+  .portada {
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 22px;
+    padding-inline: 20px;
+    background: var(--noche);
+    text-align: center;
+    z-index: 2;
+    transition: opacity .8s ease;
+  }
+  .portada.fuera { opacity: 0; pointer-events: none; }
+  .portada p {
+    margin: 0;
+    font-family: var(--font-titulo);
+    font-style: italic;
+    font-size: clamp(1.6rem, 6vw, 2.3rem);
+    color: var(--tinta);
+  }
+  button {
+    font-family: var(--font-carta);
+    font-weight: 700;
+    font-size: 1.6rem;
+    color: var(--noche);
+    background: var(--girasol);
+    border: 0;
+    border-radius: 999px;
+    padding: 10px 34px;
+    cursor: pointer;
+    box-shadow: 0 0 0 0 rgba(255, 210, 31, .5);
+    animation: latido 2s ease-out infinite;
+  }
+  button:focus-visible { outline: 3px solid var(--tinta); outline-offset: 4px; }
+  .otra-vez {
+    align-self: center;
+    margin-block: 4px 18px;
+    font-size: 1.25rem;
+    padding: 6px 22px;
+    background: transparent;
+    color: var(--tinta-suave);
+    border: 1px solid var(--tinta-suave);
+    animation: aparecer .6s ease-out both;
+  }
 
-    .tallo {
-      position: absolute; bottom: 0; left: 50%; width: 10px; height: 0;
-      transform: translateX(-50%); background: linear-gradient(#3fa34d, #2b7a36);
-      border-radius: 5px; animation: crecer 2s ease-out forwards;
-    }
-    @keyframes crecer { to { height: 280px; } }
+  @keyframes aparecer { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @keyframes parpadeo { 50% { opacity: 0; } }
+  @keyframes latido { 70% { box-shadow: 0 0 0 16px rgba(255, 210, 31, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 210, 31, 0); } }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
 
-    .hoja {
-      position: absolute; width: 70px; height: 32px; background: #3fa34d;
-      border-radius: 0 100% 0 100%; opacity: 0; animation: aparecer .8s ease-out forwards;
-    }
-    .hoja.izq { bottom: 90px; left: 82px; transform: rotate(-20deg); animation-delay: 1.4s; }
-    .hoja.der { bottom: 150px; right: 82px; transform: scaleX(-1) rotate(-20deg); animation-delay: 1.7s; }
-
-    .flor {
-      position: absolute; top: 20px; left: 50%; width: 220px; height: 220px;
-      transform: translateX(-50%) scale(0); animation: abrir 1.5s 2s cubic-bezier(.3,1.5,.5,1) forwards;
-    }
-    @keyframes abrir { to { transform: translateX(-50%) scale(1); } }
-    .flor-giro { width: 100%; height: 100%; position: relative; animation: girar 20s 3.5s linear infinite; }
-    @keyframes girar { to { transform: rotate(360deg); } }
-
-    .petalo {
-      position: absolute; top: 50%; left: 50%; width: 40px; height: 90px; margin: -90px 0 0 -20px;
-      background: linear-gradient(#ffd93b, #f4a91d); border-radius: 50% 50% 50% 50% / 70% 70% 30% 30%;
-      transform-origin: 50% 100%;
-    }
-    .centro {
-      position: absolute; top: 50%; left: 50%; width: 90px; height: 90px; margin: -45px 0 0 -45px;
-      border-radius: 50%; background: radial-gradient(circle, #6b3e1f 0 30%, #4a2810 31% 100%);
-      background-image: radial-gradient(#2e1806 2px, transparent 2.5px), radial-gradient(circle, #6b3e1f, #3b200c);
-      background-size: 9px 9px, 100% 100%; box-shadow: inset 0 0 12px #000;
-    }
-
-    .mensaje {
-      margin-top: 24px; text-align: center; opacity: 0; animation: aparecer 1.5s 3.5s forwards;
-      padding: 0 16px;
-    }
-    .mensaje h1 { font-size: 2rem; color: #ffd93b; text-shadow: 0 0 12px rgba(255,217,59,.5); }
-    .mensaje p { margin-top: 8px; font-size: 1.1rem; opacity: .9; }
-    @keyframes aparecer { to { opacity: 1; } }
-  </style>
 </head>
 <body>
-  <div class="escena">
-    <div class="tallo"></div>
-    <div class="hoja izq"></div>
-    <div class="hoja der"></div>
-    <div class="flor"><div class="flor-giro" id="flor"><div class="centro"></div></div></div>
-  </div>
+<div class="portada" id="portada">
+  <p>Tengo algo para ti, mi cielo</p>
+  <button type="button" id="abrir">Ábrelo</button>
+</div>
 
-  <div class="mensaje">
-    <h1>Para mi niña 🌻</h1>
-    <p>Como el girasol busca al sol, yo siempre te busco a ti.</p>
-  </div>
+<main class="escena">
+  <section class="carta" aria-live="polite">
+    <h1 id="titulo"></h1>
+    <div class="lineas" id="lineas"></div>
+    <button type="button" class="otra-vez" id="otraVez" hidden>Verlo otra vez</button>
+  </section>
+  <div class="jardin"><canvas id="lienzo" aria-label="Ramo de girasoles dibujándose"></canvas></div>
+</main>
 
-  <script>
-    const flor = document.getElementById('flor');
-    const centro = flor.querySelector('.centro');
-    for (let i = 0; i < 16; i++) {
-      const p = document.createElement('div');
-      p.className = 'petalo';
-      p.style.transform = `rotate(${i * 22.5}deg)`;
-      flor.insertBefore(p, centro);
-    }
-    for (let i = 0; i < 80; i++) {
-      const s = document.createElement('div');
-      s.className = 'estrella';
-      s.style.top = Math.random() * 100 + 'vh';
-      s.style.left = Math.random() * 100 + 'vw';
-      s.style.animationDelay = Math.random() * 3 + 's';
-      document.body.appendChild(s);
-    }
-  </script>
+<script>
+const TITULO = "Para ti, mi amor ❤️";
+const MENSAJE = [
+  "Me duele saber que en estos días te he hecho sentir mal :(",
+  "No es mi intención hacerlo. Yo te amo con todo mi corazón 🥺",
+  "No sabes lo que daría por estar más tiempo a tu lado cada vez que te veo, y eso también me hace sentir mal.",
+  "Espero que me perdones, mi cielo 🥺",
+  "Sabes que te amo mucho y que jamás dejaré de hacerlo por nada en el mundo.",
+  "Eres mi universo universal 🤭",
+  "Espero que te guste este regalito ❤️🥺🥰",
+];
+const DESPEDIDA = "Tamo mucho muchito ❤️";
+
+const reducido = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const espera = ms => new Promise(r => setTimeout(r, reducido ? 0 : ms));
+const letras = s => window.Intl && Intl.Segmenter
+  ? Array.from(new Intl.Segmenter("es", { granularity: "grapheme" }).segment(s), x => x.segment)
+  : Array.from(s);
+
+/* ---------- Girasoles ---------- */
+const C = {
+  amarillo: "#FFD21F", amarilloOscuro: "#E3A008", naranja: "#C97A06",
+  cafe: "#3B2209", cafeMedio: "#5C3A12", verde: "#4E8B2E", verdeOscuro: "#2F5E1B",
+};
+const lienzo = document.getElementById("lienzo");
+const ctx = lienzo.getContext("2d");
+// Zona del dibujo en coordenadas "turtle" (y hacia arriba)
+const VISTA = { x0: -265, x1: 245, y0: -425, y1: 200 };
+let escala = 1, ox = 0, oy = 0;
+
+function ajustar() {
+  const r = lienzo.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  lienzo.width = Math.round(r.width * dpr);
+  lienzo.height = Math.round(r.height * dpr);
+  const w = VISTA.x1 - VISTA.x0, h = VISTA.y1 - VISTA.y0;
+  escala = Math.min(r.width / w, r.height / h) * dpr;
+  ox = (lienzo.width - w * escala) / 2 - VISTA.x0 * escala;
+  oy = lienzo.height + VISTA.y0 * escala; // pegado abajo
+}
+const P = (x, y) => [ox + x * escala, oy - y * escala];
+
+function forma(x, y, ang, largo, ancho, relleno, borde) {
+  const rad = ang * Math.PI / 180, dx = Math.cos(rad), dy = Math.sin(rad), px = -dy, py = dx;
+  const a = [], b = [], pasos = 24;
+  for (let i = 0; i <= pasos; i++) {
+    const s = i / pasos, w = ancho * Math.pow(Math.sin(Math.PI * s), 0.8) * (1 - 0.35 * s);
+    const bx = x + dx * largo * s, by = y + dy * largo * s;
+    a.push(P(bx + px * w, by + py * w)); b.push(P(bx - px * w, by - py * w));
+  }
+  const pts = a.concat(b.reverse());
+  ctx.beginPath(); ctx.moveTo(...pts[0]); pts.forEach(p => ctx.lineTo(...p)); ctx.closePath();
+  ctx.fillStyle = relleno; ctx.fill();
+  ctx.strokeStyle = borde; ctx.lineWidth = Math.max(1, escala * 0.9); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(...P(x + dx * largo * .15, y + dy * largo * .15));
+  ctx.lineTo(...P(x + dx * largo * .8, y + dy * largo * .8)); ctx.stroke();
+}
+
+const FLORES = [ // x, y, tamaño, giro
+  [-150, -30, 90, 8],
+  [-10, -195, 100, 3],
+  [90, 65, 120, 0],
+];
+const HOJAS = [
+  [-60, -310, 150, 95, 28], [40, -290, 30, 105, 30],
+  [-110, -165, 165, 80, 24], [70, -85, 20, 85, 24],
+];
+const BASE_Y = -420;
+
+function pasosDelDibujo() {
+  const pasos = [];
+  // Tallos: se dibujan por tramos
+  FLORES.forEach(([fx, fy], k) => {
+    const curva = [-40, 25, 45][k], x0 = fx * 0.15;
+    for (let i = 1; i <= 30; i++) pasos.push(() => {
+      const t0 = (i - 1) / 30, t1 = i / 30;
+      const pt = s => P(x0 + (fx - x0) * s + Math.sin(Math.PI * s) * curva, BASE_Y + (fy - BASE_Y) * s);
+      ctx.beginPath(); ctx.moveTo(...pt(t0)); ctx.lineTo(...pt(t1));
+      ctx.strokeStyle = C.verdeOscuro; ctx.lineWidth = 7 * escala; ctx.lineCap = "round"; ctx.stroke();
+    });
+  });
+  HOJAS.forEach(([x, y, a, l, w]) => pasos.push(() => forma(x, y, a, l, w, C.verde, C.verdeOscuro)));
+  FLORES.forEach(([cx, cy, r, giro]) => {
+    const n = 18;
+    for (let i = 0; i < n; i++) pasos.push(() =>
+      forma(cx, cy, giro + i * 360 / n + 180 / n, r, r * .27, C.amarilloOscuro, C.naranja));
+    for (let i = 0; i < n; i++) pasos.push(() =>
+      forma(cx, cy, giro + i * 360 / n, r * .9, r * .24, C.amarillo, C.amarilloOscuro));
+    const rc = r * .42;
+    pasos.push(() => {
+      ctx.beginPath(); ctx.arc(...P(cx, cy), rc * escala, 0, Math.PI * 2);
+      ctx.fillStyle = C.cafe; ctx.fill(); ctx.strokeStyle = C.cafeMedio; ctx.lineWidth = 2 * escala; ctx.stroke();
+    });
+    const semillas = Math.floor(rc * 4), c = rc * .92 / Math.sqrt(semillas);
+    for (let i0 = 0; i0 < semillas; i0 += 8) pasos.push(() => {
+      for (let i = i0; i < Math.min(i0 + 8, semillas); i++) {
+        const d = c * Math.sqrt(i), a = i * 137.508 * Math.PI / 180;
+        const tam = (2 + 4 * d / rc) / 2;
+        ctx.beginPath(); ctx.arc(...P(cx + d * Math.cos(a), cy + d * Math.sin(a)), tam * escala, 0, Math.PI * 2);
+        ctx.fillStyle = i % 3 ? "#7A4E1C" : "#1E1003"; ctx.fill();
+      }
+    });
+  });
+  return pasos;
+}
+
+let pasosHechos = 0, todosLosPasos = [];
+function redibujar() { // al cambiar el tamaño de pantalla
+  ajustar(); ctx.clearRect(0, 0, lienzo.width, lienzo.height);
+  for (let i = 0; i < pasosHechos; i++) todosLosPasos[i]();
+}
+function dibujarGirasoles(duracionMs) {
+  todosLosPasos = pasosDelDibujo(); pasosHechos = 0; redibujar();
+  return new Promise(listo => {
+    if (reducido) { pasosHechos = todosLosPasos.length; redibujar(); return listo(); }
+    const inicio = performance.now();
+    (function cuadro(ahora) {
+      const meta = Math.min(todosLosPasos.length, Math.ceil((ahora - inicio) / duracionMs * todosLosPasos.length));
+      while (pasosHechos < meta) todosLosPasos[pasosHechos++]();
+      pasosHechos < todosLosPasos.length ? requestAnimationFrame(cuadro) : listo();
+    })(inicio);
+  });
+}
+new ResizeObserver(redibujar).observe(lienzo);
+
+/* ---------- Mensaje ---------- */
+async function escribir(el, texto, ms) {
+  el.classList.add("cursor");
+  for (const l of letras(texto)) { el.textContent += l; await espera(ms); }
+  el.classList.remove("cursor");
+}
+async function mostrarMensaje() {
+  const titulo = document.getElementById("titulo"), cont = document.getElementById("lineas");
+  await escribir(titulo, TITULO, 70);
+  await espera(700);
+  for (const linea of MENSAJE) {
+    const p = document.createElement("p"); cont.appendChild(p);
+    await escribir(p, linea, 38);
+    await espera(900);
+  }
+  const fin = document.createElement("p"); fin.className = "final"; cont.appendChild(fin);
+  await escribir(fin, DESPEDIDA, 80);
+  await espera(600);
+  document.getElementById("otraVez").hidden = false;
+}
+
+async function empezar() {
+  document.getElementById("titulo").textContent = "";
+  document.getElementById("lineas").textContent = "";
+  document.getElementById("otraVez").hidden = true;
+  await dibujarGirasoles(9000);
+  await espera(400);
+  await mostrarMensaje();
+}
+
+document.getElementById("abrir").addEventListener("click", () => {
+  document.getElementById("portada").classList.add("fuera");
+  empezar();
+});
+document.getElementById("otraVez").addEventListener("click", empezar);
+</script>
 </body>
 </html>
